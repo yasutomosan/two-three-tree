@@ -40,7 +40,7 @@ int Search(Node **cnode,int space){
     }
     else{
         printf("%d %d\n", (*cnode)->keys[0],(*cnode)->keys[1]);
-        printf("number_keys: %d\n", (*cnode)->number_keys);
+        //printf("number_keys: %d\n", (*cnode)->number_keys);
     }
     //printf("\nkey ");
     //for(int i = 0; i < 3; i++) {
@@ -85,6 +85,7 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
         for (int j = 0; j < 4; j++){
             new_node->children[j] = NULL;
         }
+        new_node->parent = NULL; // 新しいノードの親はNULL
         
         //new_node->parent = NULL;
         //if(left){
@@ -94,6 +95,7 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
         //if(left) left->parent = new_node;
         //if(right) right->parent = new_node;
         //*cnode = new_node;
+        tree.root = new_node; // 新しいノードを木の根に設定
         return 0;
         
     
@@ -127,7 +129,7 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
     //Search(&tree.root,0);
 
     printf("dividebefore\n");
-    Search(&tree.root,0);
+    //Search(&tree.root,0);
     // 分割処理
     if(current->number_keys == 3) {
         //printf("divide\n");
@@ -195,7 +197,7 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
 
 
     //        // その後、親ノードに新しいキーを挿入
-            InsertUP(&current->parent, current->keys[1], left, right, up,children_index);
+            InsertUP(&current, current->keys[1], left, right, up,children_index);
 
     //        free(current);
     //        Search(&tree.root,0);
@@ -241,6 +243,24 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children
         printf("tree.root:keys: %d %d %d\n", tree.root->keys[0], tree.root->keys[1], tree.root->keys[2]);
 
         return 0;
+    }
+    else{
+        if(children_index == 0) {
+            //printf("children_index: %d\n", children_index);
+            //printf("left: %d right: %d\n", left->keys[0], right->keys[0]);
+            Node *new_node = (Node *)malloc(sizeof(Node));
+            new_node->number_keys = 1;
+            (*cnode)->parent->children[3] = (*cnode)->parent->children[2];
+            (*cnode)->parent->children[2] = (*cnode)->parent->children[1];
+            (*cnode)->parent->children[1] = (*cnode)->parent->children[0]; 
+            (*cnode)->parent->children[0] = (*cnode)->parent->children[0]; 
+            (*cnode)->parent->children[0] = left;
+            (*cnode)->parent->children[1] = right;
+            (*cnode)->parent->children[2] = (*cnode);
+            (*cnode)->parent->keys[0] = i;
+            (*cnode)->parent->number_keys = 1;
+            (*cnode)->parent->children[3] = NULL;
+        }
     }
 }
 
@@ -594,10 +614,10 @@ int main(void){
     //Insert(&tree.root,14, NULL, NULL,down,0);
     //Insert(&tree.root,15, NULL, NULL,down,0);
     Insert(&tree.root,11, NULL, NULL,down,0);
-    Search(&tree.root,0);
+    //Search(&tree.root,0);
 
     Insert(&tree.root,10, NULL, NULL,down,0);
-    Search(&tree.root,0);
+    //Search(&tree.root,0);
 
     Insert(&tree.root,9, NULL, NULL,down,0);
     Insert(&tree.root,8, NULL, NULL,down,0);
