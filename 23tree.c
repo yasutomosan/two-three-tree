@@ -198,6 +198,11 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
 
 
     //        // その後、親ノードに新しいキーを挿入
+            printf("current->keys[1]: %d\n", current->keys[1]);
+            printf("current->keys[2]: %d\n", current->keys[2]);
+            if(current->parent!= NULL) {
+            printf("current->parent->keys[0]: %d\n", current->parent->keys[0]);
+            }
             InsertUP(&current, current->keys[1], left, right, up,children_index);
 
     //        free(current);
@@ -210,6 +215,8 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
 }
 
 int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children_index){
+    printf("This is insertUP & i: %d  state: %d.\n", i,state);
+    printf("keys: %d %d %d\n", (*cnode)->keys[0], (*cnode)->keys[1], (*cnode)->keys[2]);
     if((*cnode)->parent == NULL){
         //Node *new_node = (Node *)malloc(sizeof(Node));
         Node *left_node = (Node *)malloc(sizeof(Node));
@@ -246,7 +253,30 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children
         return 0;
     }
     else{
-        if(children_index == 0) {
+        printf("parentkeys: %d %d %d\n", (*cnode)->parent->keys[0], (*cnode)->parent->keys[1], (*cnode)->parent->keys[2]);
+
+        int idx=-1;
+        for (int k = 0; k < 4; k++) {
+            if ((*cnode)->parent->children[k] == (*cnode)) {
+            //if ((*cnode)->parent->children[k]->keys[0] == (*cnode)->keys[0]) {
+                idx = k;
+                break;
+            }
+        }
+        if (idx == -1) {
+            printf("children_index error: parent->childrenにcnodeが見つかりません\n");
+            for (int k = 0; k < 4; k++) {
+                printf("parent->children[%d]=%p, cnode=%p\n", k, (void*)(*cnode)->parent->children[k], (void*)(*cnode));
+            }
+            return -1;
+        }
+        printf("idx: %d i;%d\n", idx,i);
+        printf("(*cnode)->parent->children[0]->keys[0]: %d\n", (*cnode)->parent->children[0]->keys[0]);
+        printf("(*cnode)->parent->children[1]->keys[0]: %d\n", (*cnode)->parent->children[1]->keys[0]);
+        printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
+
+        if(idx == 0) {
+            //printf("(*cnode)->children[0]->parent->keys[0]: %d\n", (*cnode)->children[0]->parent->keys[0]);
             //printf("children_index: %d\n", children_index);
             //printf("left: %d right: %d\n", left->keys[0], right->keys[0]);
             //親にキーを追加
@@ -256,6 +286,7 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children
             (*cnode)->parent->number_keys++;
             //新ノードを親のchildren[0]へ
             Node *new_node = (Node *)malloc(sizeof(Node));
+            //(*cnode)->children[0]->parent = (*cnode)->children[1]->parent = new_node;
             new_node->number_keys = 1;
             new_node->keys[0] = (*cnode)->keys[0];
             new_node->keys[1] = new_node->keys[2] = INT_MAX;
@@ -263,6 +294,11 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children
             new_node->children[0] = (*cnode)->children[0];
             new_node->children[1] = (*cnode)->children[1];
             new_node->children[2] = new_node->children[3] = NULL;
+            if (new_node->children[0]) new_node->children[0]->parent = new_node;
+            if (new_node->children[1]) new_node->children[1]->parent = new_node;
+            //new_node->children[0]->parent = new_node;
+            //new_node->children[1]->parent = new_node;
+            //new_node->children[0] = NULL;
             
             //現在のノードは親のchildren[1]へ
             (*cnode)->number_keys = 1;
@@ -271,18 +307,21 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children
             (*cnode)->children[0] = (*cnode)->children[2];
             (*cnode)->children[1] = (*cnode)->children[3];
             (*cnode)->children[2] = (*cnode)->children[3] = NULL;
+            if ((*cnode)->children[0]) (*cnode)->children[0]->parent = (*cnode);
+            if ((*cnode)->children[1]) (*cnode)->children[1]->parent = (*cnode);
 
             (*cnode)->parent->children[3] = (*cnode)->parent->children[2];
             (*cnode)->parent->children[2] = (*cnode)->parent->children[1];
             (*cnode)->parent->children[1] = (*cnode); 
             (*cnode)->parent->children[0] = new_node; 
         }
-        else if(children_index == 1) {
+        else if(idx == 1) {
             (*cnode)->parent->keys[2] = (*cnode)->parent->keys[1];
             (*cnode)->parent->keys[1] = i;
             (*cnode)->parent->number_keys++;
             //新ノードを親のchildren[1]へ
             Node *new_node = (Node *)malloc(sizeof(Node));
+            //(*cnode)->children[0]->parent = (*cnode)->children[1]->parent = new_node;
             new_node->number_keys = 1;
             new_node->keys[0] = (*cnode)->keys[0];
             new_node->keys[1] = new_node->keys[2] = INT_MAX;
@@ -290,6 +329,10 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children
             new_node->children[0] = (*cnode)->children[0];
             new_node->children[1] = (*cnode)->children[1];
             new_node->children[2] = new_node->children[3] = NULL;
+            new_node->children[0]->parent = new_node;
+            new_node->children[1]->parent = new_node;
+            if (new_node->children[0]) new_node->children[0]->parent = new_node;
+            if (new_node->children[1]) new_node->children[1]->parent = new_node;
             
             //現在のノードは親のchildren[2]へ
             (*cnode)->number_keys = 1;
@@ -298,13 +341,54 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children
             (*cnode)->children[0] = (*cnode)->children[2];
             (*cnode)->children[1] = (*cnode)->children[3];
             (*cnode)->children[2] = (*cnode)->children[3] = NULL;
+            if ((*cnode)->children[0]) (*cnode)->children[0]->parent = (*cnode);
+            if ((*cnode)->children[1]) (*cnode)->children[1]->parent = (*cnode);
 
             (*cnode)->parent->children[3] = (*cnode)->parent->children[2];
             (*cnode)->parent->children[2] = (*cnode);
             (*cnode)->parent->children[1] = new_node; 
         }
-    }
+        else if(idx == 2) {
+            (*cnode)->parent->keys[2] = i;
+            (*cnode)->parent->number_keys++;
+            //新ノードを親のchildren[2]へ
+            Node *new_node = (Node *)malloc(sizeof(Node));
+            //(*cnode)->children[0]->parent = (*cnode)->children[1]->parent = new_node;
+            new_node->number_keys = 1;
+            new_node->keys[0] = (*cnode)->keys[0];
+            new_node->keys[1] = new_node->keys[2] = INT_MAX;
+            new_node->parent = (*cnode)->parent;
+            new_node->children[0] = (*cnode)->children[0];
+            new_node->children[1] = (*cnode)->children[1];
+            new_node->children[2] = new_node->children[3] = NULL;
+            new_node->children[0]->parent = new_node;
+            new_node->children[1]->parent = new_node;
+            if (new_node->children[0]) new_node->children[0]->parent = new_node;
+            if (new_node->children[1]) new_node->children[1]->parent = new_node;
+            
+            //現在のノードは親のchildren[3]へ
+            (*cnode)->number_keys = 1;
+            (*cnode)->keys[0] = (*cnode)->keys[2];
+            (*cnode)->keys[1] = (*cnode)->keys[2] = INT_MAX;
+            (*cnode)->children[0] = (*cnode)->children[2];
+            (*cnode)->children[1] = (*cnode)->children[3];
+            (*cnode)->children[2] = (*cnode)->children[3] = NULL;
+            if ((*cnode)->children[0]) (*cnode)->children[0]->parent = (*cnode);
+            if ((*cnode)->children[1]) (*cnode)->children[1]->parent = (*cnode);
+
+            (*cnode)->parent->children[3] = (*cnode);
+            (*cnode)->parent->children[2] = new_node; 
+        }
+        else{
+            printf("children_index error\n");
+            return -1;
+        }
+        //親ノードのkeyが3つになった場合
+        if((*cnode)->parent->number_keys == 3) {
+            InsertUP(&(*cnode)->parent, (*cnode)->parent->keys[1],NULL, NULL, up,children_index);
+        }
     return 0;
+    }
 }
 
 
@@ -633,7 +717,6 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
         printf("Leaf node have not key.\n");
         return 0;
     }
-    return 0;
 }
 
 
