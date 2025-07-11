@@ -609,6 +609,22 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
                 printf("method 4.\n");
             }
         }
+    // もし削除後に root ノードが INT_MIN になった場合、それを取り除く
+    if ((*cnode)->parent == NULL && (*cnode)->number_keys == 0) {
+        if ((*cnode)->children[0]) {
+            tree.root = (*cnode)->children[0];
+            tree.root->parent = NULL;
+            free(*cnode);
+            *cnode = NULL;
+            printf("Leaf: Root node removed. Child became new root.\n");
+        } else {
+            tree.root = NULL;
+            free(*cnode);
+            *cnode = NULL;
+            printf("Leaf: Tree is now empty.\n");
+        }
+    }
+
         return 0;
     }
     else{
