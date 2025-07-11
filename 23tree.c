@@ -20,7 +20,7 @@ Tree tree; //木を作成
 int Actually_delete_leaf(Node **cnode, int i,int children_index);
 int Delete_internal(Node **cnode, int i,int children_index);
 int Actually_delete_internal(Node **cnode,int j,int children_index);
-int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children_index) {}
+int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children_index);
 
 
 
@@ -94,7 +94,7 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
         //if(left) left->parent = new_node;
         //if(right) right->parent = new_node;
         //*cnode = new_node;
-        //return 0;
+        return 0;
         
     
     }
@@ -125,88 +125,88 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
     current->number_keys++;
     printf("current->number_keys: %d\n", current->number_keys);
     //Search(&tree.root,0);
-    //もし子がいるなら
+
     printf("dividebefore\n");
     Search(&tree.root,0);
     // 分割処理
     if(current->number_keys == 3) {
-        printf("divide\n");
-        Node *left = (Node *)malloc(sizeof(Node));
-        Node *right = (Node *)malloc(sizeof(Node));
-        left->number_keys = 1;
-        left->keys[0] = current->keys[0];
-        left->keys[1] = left->keys[2] = INT_MAX;
-        right->number_keys = 1;
-        right->keys[0] = current->keys[2];
-        right->keys[1] = right->keys[2] = INT_MAX;
+        //printf("divide\n");
+        //Node *left = (Node *)malloc(sizeof(Node));
+        //Node *right = (Node *)malloc(sizeof(Node));
+        //left->number_keys = 1;
+        //left->keys[0] = current->keys[0];
+        //left->keys[1] = left->keys[2] = INT_MAX;
+        //right->number_keys = 1;
+        //right->keys[0] = current->keys[2];
+        //right->keys[1] = right->keys[2] = INT_MAX;
 
 
-        for(int k=0;k<4;k++) left->children[k]=right->children[k]=NULL;
-        left->parent = right->parent = current->parent;
-        // 子ノードがある場合は分配
-        if(current->children[0]) {
-            left->children[0] = current->children[0];
-            left->children[1] = current->children[1];
-            if(left->children[0]) left->children[0]->parent = left;
-            if(left->children[1]) left->children[1]->parent = left;
-            right->children[0] = current->children[2];
-            printf("fffright->children[0] keys: %d %d %d\n", right->children[0]->keys[0], right->children[0]->keys[1], right->children[0]->keys[2]);
-            right->children[1] = current->children[3];
-            if(right->children[0]) right->children[0]->parent = right;
-            if(right->children[1]) right->children[1]->parent = right;
-        }
+        //for(int k=0;k<4;k++) left->children[k]=right->children[k]=NULL;
+        //left->parent = right->parent = current->parent;
+        //// 子ノードがある場合は分配
+        //if(current->children[0]) {
+        //    left->children[0] = current->children[0];
+        //    left->children[1] = current->children[1];
+        //    if(left->children[0]) left->children[0]->parent = left;
+        //    if(left->children[1]) left->children[1]->parent = left;
+        //    right->children[0] = current->children[2];
+        //    printf("fffright->children[0] keys: %d %d %d\n", right->children[0]->keys[0], right->children[0]->keys[1], right->children[0]->keys[2]);
+        //    right->children[1] = current->children[3];
+        //    if(right->children[0]) right->children[0]->parent = right;
+        //    if(right->children[1]) right->children[1]->parent = right;
+        //}
 
         // 親がNULLなら新しい根を作る
-        if(current->parent == NULL) {
-            printf("parent is null\n");
-            Node *new_root = NULL;
-            InsertUP(&new_root, current->keys[1], left, right,up,0);
-            left->parent = new_root;
-            right->parent = new_root;
-            *cnode = new_root;
+        //if(current->parent == NULL) {
+        //    printf("parent is null\n");
+        //    Node *new_root = NULL;
+        //    InsertUP(&new_root, current->keys[1], left, right,up,0);
+        //    left->parent = new_root;
+        //    right->parent = new_root;
+        //    *cnode = new_root;
 
-            free(current);
-            Search(&tree.root,0);
+        //    free(current);
+        //    Search(&tree.root,0);
             
-            return 0;
-        } else {
-            printf("parent is not null\n");
-            Node *parent = current->parent;
-            int idx = -1;
-            for (int k = 0; k < 4; k++) {
-                if (parent->children[k] == current) {
-                    idx = k;
-                    break;
-                }
-            }
+        //    return 0;
+    //    } else {
+    //        printf("parent is not null\n");
+    //        Node *parent = current->parent;
+    //        int idx = -1;
+    //        for (int k = 0; k < 4; k++) {
+    //            if (parent->children[k] == current) {
+    //                idx = k;
+    //                break;
+    //            }
+    //        }
 
-            // まず親ノードのchildrenを右にずらして空きを作る
-            for (int k = 3; k > idx; k--) {
-                parent->children[k] = parent->children[k-1];
-            }
-            printf("idx: %d\n", idx);
-            printf("children_index: %d\n", children_index);
-            // currentをleft/rightに置き換え
-            parent->children[idx] = left;
-            parent->children[idx+1] = right;
-            left->parent = parent;
-            right->parent = parent;
-            Search(&tree.root,0);
+    //        // まず親ノードのchildrenを右にずらして空きを作る
+    //        for (int k = 3; k > idx; k--) {
+    //            parent->children[k] = parent->children[k-1];
+    //        }
+    //        printf("idx: %d\n", idx);
+    //        printf("children_index: %d\n", children_index);
+    //        // currentをleft/rightに置き換え
+    //        parent->children[idx] = left;
+    //        parent->children[idx+1] = right;
+    //        left->parent = parent;
+    //        right->parent = parent;
+    //        Search(&tree.root,0);
 
 
-            // その後、親ノードに新しいキーを挿入
+    //        // その後、親ノードに新しいキーを挿入
             InsertUP(&current->parent, current->keys[1], left, right, up,children_index);
 
-            free(current);
-            Search(&tree.root,0);
-            return 0;
-        }
+    //        free(current);
+    //        Search(&tree.root,0);
+    //        return 0;
+    //    }
     }
     Search(&tree.root,0);
     return 0;
 }
 
-int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children_index) {
+int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children_index){
     if((*cnode)->parent == NULL){
         //Node *new_node = (Node *)malloc(sizeof(Node));
         Node *left_node = (Node *)malloc(sizeof(Node));
@@ -594,7 +594,11 @@ int main(void){
     //Insert(&tree.root,14, NULL, NULL,down,0);
     //Insert(&tree.root,15, NULL, NULL,down,0);
     Insert(&tree.root,11, NULL, NULL,down,0);
+    Search(&tree.root,0);
+
     Insert(&tree.root,10, NULL, NULL,down,0);
+    Search(&tree.root,0);
+
     Insert(&tree.root,9, NULL, NULL,down,0);
     Insert(&tree.root,8, NULL, NULL,down,0);
     Insert(&tree.root,7, NULL, NULL,down,0);
