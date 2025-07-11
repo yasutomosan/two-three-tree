@@ -71,10 +71,12 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
     // cnodeがNULLなら新しいノードを作成
     if(*cnode == NULL) {
         Node *new_node = (Node *)malloc(sizeof(Node));
+        //メモリ確保ができない場合
         if (new_node == NULL) {
             printf("Memory allocation failed.\n");
             return -1;
         }
+        //初期化
         new_node->number_keys = 1;
         new_node->keys[0] = i;
         for (int j = 1; j < 3; j++){
@@ -83,33 +85,17 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
         for (int j = 0; j < 4; j++){
             new_node->children[j] = NULL;
         }
-        //子ノードからの挿入の場合
-        if(state == up) {
-            new_node->parent = NULL;
-            if(left) new_node->children[0] = left;
-            if(right) new_node->children[1] = right;
-            if(left) left->parent = new_node;
-            if(right) right->parent = new_node;
-            printf("up\n");
-            if(new_node->children[1]->keys[0]==11){
-            }
-            
-            *cnode = new_node;
-            tree.root = new_node; // 新しいノードを木の根に設定
-            printf("tree.root:keys: %d %d %d\n", tree.root->keys[0], tree.root->keys[1], tree.root->keys[2]);
-
-            return 0;
-        } else{
-            new_node->parent = NULL;
-            if(left){
-                new_node->children[0] = left;
-            }
-            if(right) new_node->children[1] = right;
-            if(left) left->parent = new_node;
-            if(right) right->parent = new_node;
-            *cnode = new_node;
-            return 0;
-        }
+        
+        //new_node->parent = NULL;
+        //if(left){
+        //    new_node->children[0] = left;
+        //}
+        //if(right) new_node->children[1] = right;
+        //if(left) left->parent = new_node;
+        //if(right) right->parent = new_node;
+        //*cnode = new_node;
+        //return 0;
+        
     
     }
     Node *current = *cnode;
@@ -174,7 +160,7 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
         if(current->parent == NULL) {
             printf("parent is null\n");
             Node *new_root = NULL;
-            Insert(&new_root, current->keys[1], left, right,up,0);
+            InsertUP(&new_root, current->keys[1], left, right,up,0);
             left->parent = new_root;
             right->parent = new_root;
             *cnode = new_root;
@@ -209,7 +195,7 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
 
 
             // その後、親ノードに新しいキーを挿入
-            Insert(&current->parent, current->keys[1], left, right, up,children_index);
+            InsertUP(&current->parent, current->keys[1], left, right, up,children_index);
 
             free(current);
             Search(&tree.root,0);
@@ -225,17 +211,33 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children
         //Node *new_node = (Node *)malloc(sizeof(Node));
         Node *left_node = (Node *)malloc(sizeof(Node));
         Node *right_node = (Node *)malloc(sizeof(Node));
-        new_node->parent = NULL;
-        if(left) new_node->children[0] = left;
-        if(right) new_node->children[1] = right;
-        if(left) left->parent = new_node;
-        if(right) right->parent = new_node;
-        printf("up\n");
-        if(new_node->children[1]->keys[0]==11){
+        left_node->parent = (*cnode);
+        right_node->parent = (*cnode);
+        left_node->number_keys = 1;
+        right_node->number_keys = 1;
+        left_node->keys[0] = (*cnode)->keys[0];
+        right_node->keys[0] = (*cnode)->keys[2];
+        left_node->keys[1] = left_node->keys[2] = INT_MAX;
+        right_node->keys[1] = right_node->keys[2] = INT_MAX;
+        (*cnode)->number_keys = 1;
+        (*cnode)->keys[0] = i;
+        (*cnode)->keys[1] = INT_MAX;
+        (*cnode)->keys[2] = INT_MAX;
+        left_node->children[0] = (*cnode)->children[0];
+        left_node->children[1] = (*cnode)->children[1];
+        right_node->children[0] = (*cnode)->children[2];
+        right_node->children[1] = (*cnode)->children[3];
+        for(int j = 2; j < 4; j++) {
+            left_node->children[j] = NULL;
+            right_node->children[j] = NULL;
         }
+        (*cnode)->children[0] = left_node;
+        (*cnode)->children[1] = right_node;
+        (*cnode)->children[2] = (*cnode)->children[3] = NULL;
+        //(*cnode)->parent = NULL;
+        printf("up\n");
         
-        *cnode = new_node;
-        tree.root = new_node; // 新しいノードを木の根に設定
+        tree.root = (*cnode); // 新しいノードを木の根に設定
         printf("tree.root:keys: %d %d %d\n", tree.root->keys[0], tree.root->keys[1], tree.root->keys[2]);
 
         return 0;
