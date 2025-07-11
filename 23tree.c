@@ -133,82 +133,14 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
     //Search(&tree.root,0);
     // 分割処理
     if(current->number_keys == 3) {
-        //printf("divide\n");
-        //Node *left = (Node *)malloc(sizeof(Node));
-        //Node *right = (Node *)malloc(sizeof(Node));
-        //left->number_keys = 1;
-        //left->keys[0] = current->keys[0];
-        //left->keys[1] = left->keys[2] = INT_MAX;
-        //right->number_keys = 1;
-        //right->keys[0] = current->keys[2];
-        //right->keys[1] = right->keys[2] = INT_MAX;
+        // その後、親ノードに新しいキーを挿入
+        printf("current->keys[1]: %d\n", current->keys[1]);
+        printf("current->keys[2]: %d\n", current->keys[2]);
+        if(current->parent!= NULL) {
+        printf("current->parent->keys[0]: %d\n", current->parent->keys[0]);
+        }
+        InsertUP(&current, current->keys[1], left, right, up, children_index);
 
-
-        //for(int k=0;k<4;k++) left->children[k]=right->children[k]=NULL;
-        //left->parent = right->parent = current->parent;
-        //// 子ノードがある場合は分配
-        //if(current->children[0]) {
-        //    left->children[0] = current->children[0];
-        //    left->children[1] = current->children[1];
-        //    if(left->children[0]) left->children[0]->parent = left;
-        //    if(left->children[1]) left->children[1]->parent = left;
-        //    right->children[0] = current->children[2];
-        //    printf("fffright->children[0] keys: %d %d %d\n", right->children[0]->keys[0], right->children[0]->keys[1], right->children[0]->keys[2]);
-        //    right->children[1] = current->children[3];
-        //    if(right->children[0]) right->children[0]->parent = right;
-        //    if(right->children[1]) right->children[1]->parent = right;
-        //}
-
-        // 親がNULLなら新しい根を作る
-        //if(current->parent == NULL) {
-        //    printf("parent is null\n");
-        //    Node *new_root = NULL;
-        //    InsertUP(&new_root, current->keys[1], left, right,up,0);
-        //    left->parent = new_root;
-        //    right->parent = new_root;
-        //    *cnode = new_root;
-
-        //    free(current);
-        //    Search(&tree.root,0);
-            
-        //    return 0;
-    //    } else {
-    //        printf("parent is not null\n");
-    //        Node *parent = current->parent;
-    //        int idx = -1;
-    //        for (int k = 0; k < 4; k++) {
-    //            if (parent->children[k] == current) {
-    //                idx = k;
-    //                break;
-    //            }
-    //        }
-
-    //        // まず親ノードのchildrenを右にずらして空きを作る
-    //        for (int k = 3; k > idx; k--) {
-    //            parent->children[k] = parent->children[k-1];
-    //        }
-    //        printf("idx: %d\n", idx);
-    //        printf("children_index: %d\n", children_index);
-    //        // currentをleft/rightに置き換え
-    //        parent->children[idx] = left;
-    //        parent->children[idx+1] = right;
-    //        left->parent = parent;
-    //        right->parent = parent;
-    //        Search(&tree.root,0);
-
-
-    //        // その後、親ノードに新しいキーを挿入
-            printf("current->keys[1]: %d\n", current->keys[1]);
-            printf("current->keys[2]: %d\n", current->keys[2]);
-            if(current->parent!= NULL) {
-            printf("current->parent->keys[0]: %d\n", current->parent->keys[0]);
-            }
-            InsertUP(&current, current->keys[1], left, right, up,children_index);
-
-    //        free(current);
-    //        Search(&tree.root,0);
-    //        return 0;
-    //    }
     }
     Search(&tree.root,0);
     return 0;
@@ -217,177 +149,125 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int state,int children_i
 int InsertUP(Node **cnode, int i, Node *left, Node *right,int state,int children_index){
     printf("This is insertUP & i: %d  state: %d.\n", i,state);
     printf("keys: %d %d %d\n", (*cnode)->keys[0], (*cnode)->keys[1], (*cnode)->keys[2]);
+
     if((*cnode)->parent == NULL){
-        //Node *new_node = (Node *)malloc(sizeof(Node));
         Node *left_node = (Node *)malloc(sizeof(Node));
         Node *right_node = (Node *)malloc(sizeof(Node));
-        left_node->parent = (*cnode);
-        right_node->parent = (*cnode);
+
         left_node->number_keys = 1;
         right_node->number_keys = 1;
         left_node->keys[0] = (*cnode)->keys[0];
         right_node->keys[0] = (*cnode)->keys[2];
         left_node->keys[1] = left_node->keys[2] = INT_MAX;
         right_node->keys[1] = right_node->keys[2] = INT_MAX;
-        (*cnode)->number_keys = 1;
-        (*cnode)->keys[0] = i;
-        (*cnode)->keys[1] = INT_MAX;
-        (*cnode)->keys[2] = INT_MAX;
+
+        for(int j = 0; j < 4; j++) {
+            left_node->children[j] = NULL;
+            right_node->children[j] = NULL;
+        }
+
         left_node->children[0] = (*cnode)->children[0];
         left_node->children[1] = (*cnode)->children[1];
         right_node->children[0] = (*cnode)->children[2];
         right_node->children[1] = (*cnode)->children[3];
-        for(int j = 2; j < 4; j++) {
-            left_node->children[j] = NULL;
-            right_node->children[j] = NULL;
+
+        // 子のparent設定
+        for(int j = 0; j < 2; j++) {
+            if(left_node->children[j]) left_node->children[j]->parent = left_node;
+            if(right_node->children[j]) right_node->children[j]->parent = right_node;
         }
+
+        left_node->parent = (*cnode);
+        right_node->parent = (*cnode);
+
+        (*cnode)->number_keys = 1;
+        (*cnode)->keys[0] = i;
+        (*cnode)->keys[1] = (*cnode)->keys[2] = INT_MAX;
+
         (*cnode)->children[0] = left_node;
         (*cnode)->children[1] = right_node;
         (*cnode)->children[2] = (*cnode)->children[3] = NULL;
-        //(*cnode)->parent = NULL;
-        printf("up\n");
-        
-        tree.root = (*cnode); // 新しいノードを木の根に設定
-        printf("tree.root:keys: %d %d %d\n", tree.root->keys[0], tree.root->keys[1], tree.root->keys[2]);
 
+        (*cnode)->parent = NULL;
+        tree.root = (*cnode);
+
+        printf("up\n");
         return 0;
     }
-    else{
+    else {
         printf("parentkeys: %d %d %d\n", (*cnode)->parent->keys[0], (*cnode)->parent->keys[1], (*cnode)->parent->keys[2]);
 
-        int idx=-1;
+        int idx = -1;
         for (int k = 0; k < 4; k++) {
             if ((*cnode)->parent->children[k] == (*cnode)) {
-            //if ((*cnode)->parent->children[k]->keys[0] == (*cnode)->keys[0]) {
                 idx = k;
                 break;
             }
         }
+
         if (idx == -1) {
             printf("children_index error: parent->childrenにcnodeが見つかりません\n");
-            for (int k = 0; k < 4; k++) {
-                printf("parent->children[%d]=%p, cnode=%p\n", k, (void*)(*cnode)->parent->children[k], (void*)(*cnode));
-            }
             return -1;
         }
-        printf("idx: %d i;%d\n", idx,i);
-        printf("(*cnode)->parent->children[0]->keys[0]: %d\n", (*cnode)->parent->children[0]->keys[0]);
-        printf("(*cnode)->parent->children[1]->keys[0]: %d\n", (*cnode)->parent->children[1]->keys[0]);
-        printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
 
-        if(idx == 0) {
-            //printf("(*cnode)->children[0]->parent->keys[0]: %d\n", (*cnode)->children[0]->parent->keys[0]);
-            //printf("children_index: %d\n", children_index);
-            //printf("left: %d right: %d\n", left->keys[0], right->keys[0]);
-            //親にキーを追加
-            (*cnode)->parent->keys[2] = (*cnode)->parent->keys[1];
-            (*cnode)->parent->keys[1] = (*cnode)->parent->keys[0];
-            (*cnode)->parent->keys[0] = i;
-            (*cnode)->parent->number_keys++;
-            //新ノードを親のchildren[0]へ
-            Node *new_node = (Node *)malloc(sizeof(Node));
-            //(*cnode)->children[0]->parent = (*cnode)->children[1]->parent = new_node;
-            new_node->number_keys = 1;
-            new_node->keys[0] = (*cnode)->keys[0];
-            new_node->keys[1] = new_node->keys[2] = INT_MAX;
-            new_node->parent = (*cnode)->parent;
-            new_node->children[0] = (*cnode)->children[0];
-            new_node->children[1] = (*cnode)->children[1];
-            new_node->children[2] = new_node->children[3] = NULL;
-            if (new_node->children[0]) new_node->children[0]->parent = new_node;
-            if (new_node->children[1]) new_node->children[1]->parent = new_node;
-            //new_node->children[0]->parent = new_node;
-            //new_node->children[1]->parent = new_node;
-            //new_node->children[0] = NULL;
-            
-            //現在のノードは親のchildren[1]へ
-            (*cnode)->number_keys = 1;
-            (*cnode)->keys[0] = (*cnode)->keys[2];
-            (*cnode)->keys[1] = (*cnode)->keys[2] = INT_MAX;
-            (*cnode)->children[0] = (*cnode)->children[2];
-            (*cnode)->children[1] = (*cnode)->children[3];
-            (*cnode)->children[2] = (*cnode)->children[3] = NULL;
-            if ((*cnode)->children[0]) (*cnode)->children[0]->parent = (*cnode);
-            if ((*cnode)->children[1]) (*cnode)->children[1]->parent = (*cnode);
+        // 親ノードに挿入するための準備
+        Node *new_node = (Node *)malloc(sizeof(Node));
+        new_node->number_keys = 1;
+        new_node->keys[0] = (*cnode)->keys[0];
+        new_node->keys[1] = new_node->keys[2] = INT_MAX;
+        new_node->parent = (*cnode)->parent;
 
-            (*cnode)->parent->children[3] = (*cnode)->parent->children[2];
-            (*cnode)->parent->children[2] = (*cnode)->parent->children[1];
-            (*cnode)->parent->children[1] = (*cnode); 
-            (*cnode)->parent->children[0] = new_node; 
+        new_node->children[0] = (*cnode)->children[0];
+        new_node->children[1] = (*cnode)->children[1];
+        new_node->children[2] = new_node->children[3] = NULL;
+
+        if(new_node->children[0]) new_node->children[0]->parent = new_node;
+        if(new_node->children[1]) new_node->children[1]->parent = new_node;
+
+        (*cnode)->number_keys = 1;
+        (*cnode)->keys[0] = (*cnode)->keys[2];
+        (*cnode)->keys[1] = (*cnode)->keys[2] = INT_MAX;
+        (*cnode)->children[0] = (*cnode)->children[2];
+        (*cnode)->children[1] = (*cnode)->children[3];
+        (*cnode)->children[2] = (*cnode)->children[3] = NULL;
+        if((*cnode)->children[0]) (*cnode)->children[0]->parent = (*cnode);
+        if((*cnode)->children[1]) (*cnode)->children[1]->parent = (*cnode);
+
+        // 親にキーと子ノードを挿入
+        Node *parent = (*cnode)->parent;
+        if(idx == 0){
+            parent->keys[2] = parent->keys[1];
+            parent->keys[1] = parent->keys[0];
+            parent->keys[0] = i;
+            parent->children[3] = parent->children[2];
+            parent->children[2] = parent->children[1];
+            parent->children[1] = (*cnode);
+            parent->children[0] = new_node;
         }
-        else if(idx == 1) {
-            (*cnode)->parent->keys[2] = (*cnode)->parent->keys[1];
-            (*cnode)->parent->keys[1] = i;
-            (*cnode)->parent->number_keys++;
-            //新ノードを親のchildren[1]へ
-            Node *new_node = (Node *)malloc(sizeof(Node));
-            //(*cnode)->children[0]->parent = (*cnode)->children[1]->parent = new_node;
-            new_node->number_keys = 1;
-            new_node->keys[0] = (*cnode)->keys[0];
-            new_node->keys[1] = new_node->keys[2] = INT_MAX;
-            new_node->parent = (*cnode)->parent;
-            new_node->children[0] = (*cnode)->children[0];
-            new_node->children[1] = (*cnode)->children[1];
-            new_node->children[2] = new_node->children[3] = NULL;
-            new_node->children[0]->parent = new_node;
-            new_node->children[1]->parent = new_node;
-            if (new_node->children[0]) new_node->children[0]->parent = new_node;
-            if (new_node->children[1]) new_node->children[1]->parent = new_node;
-            
-            //現在のノードは親のchildren[2]へ
-            (*cnode)->number_keys = 1;
-            (*cnode)->keys[0] = (*cnode)->keys[2];
-            (*cnode)->keys[1] = (*cnode)->keys[2] = INT_MAX;
-            (*cnode)->children[0] = (*cnode)->children[2];
-            (*cnode)->children[1] = (*cnode)->children[3];
-            (*cnode)->children[2] = (*cnode)->children[3] = NULL;
-            if ((*cnode)->children[0]) (*cnode)->children[0]->parent = (*cnode);
-            if ((*cnode)->children[1]) (*cnode)->children[1]->parent = (*cnode);
-
-            (*cnode)->parent->children[3] = (*cnode)->parent->children[2];
-            (*cnode)->parent->children[2] = (*cnode);
-            (*cnode)->parent->children[1] = new_node; 
+        else if(idx == 1){
+            parent->keys[2] = parent->keys[1];
+            parent->keys[1] = i;
+            parent->children[3] = parent->children[2];
+            parent->children[2] = (*cnode);
+            parent->children[1] = new_node;
         }
-        else if(idx == 2) {
-            (*cnode)->parent->keys[2] = i;
-            (*cnode)->parent->number_keys++;
-            //新ノードを親のchildren[2]へ
-            Node *new_node = (Node *)malloc(sizeof(Node));
-            //(*cnode)->children[0]->parent = (*cnode)->children[1]->parent = new_node;
-            new_node->number_keys = 1;
-            new_node->keys[0] = (*cnode)->keys[0];
-            new_node->keys[1] = new_node->keys[2] = INT_MAX;
-            new_node->parent = (*cnode)->parent;
-            new_node->children[0] = (*cnode)->children[0];
-            new_node->children[1] = (*cnode)->children[1];
-            new_node->children[2] = new_node->children[3] = NULL;
-            new_node->children[0]->parent = new_node;
-            new_node->children[1]->parent = new_node;
-            if (new_node->children[0]) new_node->children[0]->parent = new_node;
-            if (new_node->children[1]) new_node->children[1]->parent = new_node;
-            
-            //現在のノードは親のchildren[3]へ
-            (*cnode)->number_keys = 1;
-            (*cnode)->keys[0] = (*cnode)->keys[2];
-            (*cnode)->keys[1] = (*cnode)->keys[2] = INT_MAX;
-            (*cnode)->children[0] = (*cnode)->children[2];
-            (*cnode)->children[1] = (*cnode)->children[3];
-            (*cnode)->children[2] = (*cnode)->children[3] = NULL;
-            if ((*cnode)->children[0]) (*cnode)->children[0]->parent = (*cnode);
-            if ((*cnode)->children[1]) (*cnode)->children[1]->parent = (*cnode);
-
-            (*cnode)->parent->children[3] = (*cnode);
-            (*cnode)->parent->children[2] = new_node; 
-        }
-        else{
-            printf("children_index error\n");
+        else if(idx == 2){
+            parent->keys[2] = i;
+            parent->children[3] = (*cnode);
+            parent->children[2] = new_node;
+        } else {
+            printf("Unexpected idx value: %d\n", idx);
             return -1;
         }
-        //親ノードのkeyが3つになった場合
-        if((*cnode)->parent->number_keys == 3) {
-            InsertUP(&(*cnode)->parent, (*cnode)->parent->keys[1],NULL, NULL, up,children_index);
+
+        parent->number_keys++;
+
+        // 再帰的に親ノードもオーバーフローした場合
+        if(parent->number_keys == 3){
+            InsertUP(&parent, parent->keys[1], NULL, NULL, up, children_index);
         }
-    return 0;
+
+        return 0;
     }
 }
 
@@ -495,16 +375,6 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
         }
         // 2つ右の兄弟が2つのキーを持っている場合
         else if(children_index==0 && (*cnode)->parent->children[children_index+2] != NULL && (*cnode)->parent->children[children_index+2]->number_keys == 2) {
-            //(*cnode)->children[0]->keys[1] = (*cnode)->children[1]->keys[0];
-            //(*cnode)->children[0]->number_keys = 2;
-            //(*cnode)->children[1]->keys[0] = (*cnode)->parent->children[children_index+1]->keys[0];
-            //(*cnode)->keys[0] = (*cnode)->parent->keys[children_index];
-            //(*cnode)->parent->keys[children_index] = (*cnode)->parent->children[children_index+1]->keys[0];
-            //(*cnode)->parent->children[children_index+1]->keys[0] = (*cnode)->parent->keys[children_index+1];
-            //(*cnode)->parent->keys[children_index+1] = (*cnode)->parent->children[children_index+2]->keys[0];
-            //(*cnode)->parent->children[children_index+2]->keys[0] = (*cnode)->parent->children[children_index+2]->keys[1];
-            //(*cnode)->parent->children[children_index+2]->keys[1] = INT_MAX;
-            //(*cnode)->parent->children[children_index+2]->number_keys--;
             (*cnode)->keys[0] = (*cnode)->parent->keys[children_index];
             (*cnode)->parent->keys[children_index] = (*cnode)->parent->keys[children_index+1];
             (*cnode)->parent->keys[children_index+1] = INT_MAX;
