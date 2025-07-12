@@ -28,10 +28,10 @@ int Search(Node **cnode,int space){
     if(tree.root == NULL) {
         printf("Tree is empty.\n");
     }
-    if (*cnode == NULL) {
-        //printf("empty ");
-        return 0;
-    }
+    //if (*cnode == NULL) {
+    //    printf("empty ");
+    //    return 0;
+    //}
     for(int i = 0; i < space; i++) {
         printf(" ");
     }
@@ -40,9 +40,12 @@ int Search(Node **cnode,int space){
     }
     else if((*cnode)->keys[1] == INT_MIN || (*cnode)->keys[1] == INT_MAX){
         printf("%d \n", (*cnode)->keys[0]);
+        printf("%d \n", (*cnode));
     }
     else{
         printf("%d %d\n", (*cnode)->keys[0],(*cnode)->keys[1]);
+        printf("%d \n", (*cnode));
+
         //printf("number_keys: %d\n", (*cnode)->number_keys);
     }
     //printf("\nkey ");
@@ -309,6 +312,8 @@ int Delete_leaf(Node **cnode, int i,int children_index){
             }
             //ノードが葉の場合
             Actually_delete_leaf(cnode, j,children_index);
+            Search(&tree.root,0);
+
             //printf("return2\n");
             break;
             return 0;
@@ -472,7 +477,6 @@ int Actually_delete_internal(Node **cnode, int i, int children_index) {
     return 0;
 }
 
-
 int Actually_delete_leaf(Node **cnode, int i, int children_index){
     //printf("children_index: %d\n", children_index);
     printf("i: %d\n", i);
@@ -526,6 +530,10 @@ int Actually_delete_leaf(Node **cnode, int i, int children_index){
         // マージ（兄弟も1キー） → 親のキーを取り込んで2キーにする
         if(parent->number_keys == 2) {
             //printf("Leaf node is 1 key, parent has 2 keys.\n");
+            printf("children_index: %d\n", children_index);
+            printf("(*cnode)->parent->children[0]->keys[0]: %d\n", parent->children[0]->keys[0]);
+            printf("(*cnode)->parent->children[2]->keys[0]: %d\n", parent->children[2]->keys[0]);
+            printf("(*cnode)->parent->children[2]->keys[0]: %d\n", parent->children[2]);
 
             if(children_index == 2) {
                 Node *left = parent->children[1];
@@ -546,9 +554,14 @@ int Actually_delete_leaf(Node **cnode, int i, int children_index){
                 parent->keys[0] = parent->keys[1];
                 parent->keys[1] = INT_MAX;
                 parent->number_keys--;
-                free(*cnode);
                 parent->children[1] = parent->children[2];
                 parent->children[2] = NULL;
+                if(parent->children[2]!=NULL)printf("children[2]:%d\n", parent->children[2]);
+                if(parent->children[1]!=NULL)printf("children[1]:%d\n", parent->children[1]);
+                if(parent->children[0]!=NULL)printf("children[0]:%d\n", parent->children[0]);
+                //printf("children[1]:%d\n", parent->children[1]);
+
+                free(*cnode);
                 *cnode = NULL;
                 //printf("method 3.\n");
                 return 0;
@@ -697,7 +710,7 @@ int main(void){
             printf("Delete:\n");
             scanf("%d", &i);
             Delete_leaf((&tree.root), i,0);
-            Search(&tree.root,0);
+            //Search(&tree.root,0);
             //printf("oooooo:\n");
             Delete_internal((&tree.root), i,0);
             break;
