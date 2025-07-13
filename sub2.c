@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#define width 2 //挿入されるキーの幅の最大
+#define width 4 //挿入されるキーの幅の最大
 
 typedef struct Node {
     int number_keys;//キーの数
@@ -72,7 +72,7 @@ int Insert(Node **cnode, int i, Node *left, Node *right,int children_index) {
         Node *new_node = (Node *)malloc(sizeof(Node));
         //メモリ確保ができない場合
         if (new_node == NULL) {
-            printf("Memory Allocation Error!!!!\n");
+            printf("Memory Allocation ERROR!!!!\n");
             return -1;
         }
         //初期化
@@ -181,7 +181,7 @@ int InsertUP(Node **cnode, int i, Node *left, Node *right){
         }
 
         if (idx == -1) {
-            printf("children_index error: parent->childrenにcnodeが見つかりません\n");
+            printf("children_index ERROR!!!!!!!!!!\n");
             return -1;
         }
 
@@ -259,7 +259,7 @@ int Delete_leaf(Node **cnode, int i,int children_index){
     for(int j = 0; j < (*cnode)->number_keys; j++) {
         if((*cnode)->keys[j] == i) {
             //キーが見つかった場合
-            printf("Key %d found and deleted.\n", i);
+            //printf("Key %d found and deleted.\n", i);
             //ノードが葉ではない場合
             if((*cnode)->children[0] != NULL) {
                 //右の子ノードから最小値を値を取得
@@ -271,9 +271,8 @@ int Delete_leaf(Node **cnode, int i,int children_index){
                 int tmp = (*cnode)->keys[j];
                 (*cnode)->keys[j] = right_child->keys[0];
                 right_child->keys[0] = tmp;
-                printf("ddd1dd%d\n", right_child->keys[0]);
-                printf("ddd1dd%d\n", children_index);
-                Actually_delete_leaf(&right_child, 0,1);
+
+                Actually_delete_leaf(&right_child, 0,0);
                 break;
             }
             //ノードが葉の場合
@@ -299,7 +298,7 @@ int Delete_internal(Node **cnode, int i,int children_index){
     for(int j = 0; j < (*cnode)->number_keys+1; j++) {
         if((*cnode)->keys[j] == INT_MIN) {
             //キーが見つかった場合
-            printf("INT_MIN found and deleted.\n");
+            //printf("INT_MIN found and deleted.\n");
             Actually_delete_internal(cnode, j,children_index);
             return 0;
 
@@ -309,7 +308,6 @@ int Delete_internal(Node **cnode, int i,int children_index){
 }
 
 int Actually_delete_internal(Node **cnode, int i,int children_index){
-    printf("This is Actually_delete_internal.\n");
     if((*cnode)->number_keys == 1) {
         //兄弟にkey_numberが2のものがないか探す
         //1つ右の兄弟が2つのキーを持っている場合
@@ -323,7 +321,6 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
             (*cnode)->parent->children[children_index+1]->children[0] =(*cnode)->parent->children[children_index+1]->children[1];
             (*cnode)->parent->children[children_index+1]->children[1] = (*cnode)->parent->children[children_index+1]->children[2];
             (*cnode)->parent->children[children_index+1]->children[2] = NULL;
-            printf("Leaf node is 1 key, borrowed from right (*cnode)->parent->children[0].\n");
             printf("method 2-1.\n");
             return 0;
         }
@@ -336,24 +333,17 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
             (*cnode)->children[1] = (*cnode)->children[0];
             (*cnode)->children[0] = (*cnode)->parent->children[children_index-1]->children[2];
             (*cnode)->parent->children[children_index-1]->children[2] = NULL;
-            printf("Leaf node is 1 key, borrowed from left (*cnode)->parent->children[0].\n");
             printf("method 2-2.\n");
             return 0;
         }
         //2つ右の兄弟が2つのキーを持っている場合
         else if(children_index==0 && (*cnode)->parent->children[children_index+2] != NULL && (*cnode)->parent->children[children_index+2]->number_keys == 2) {
             if((*cnode)->children[0]!=NULL){
-                printf("(*cnode)->children[0]->number_keys: %d\n", (*cnode)->children[0]->number_keys);
-                printf("(*cnode)->children[0]->keys[0]: %d\n", (*cnode)->children[0]->keys[0]);
             }
             (*cnode)->keys[0] = (*cnode)->parent->keys[children_index];
             (*cnode)->parent->keys[children_index] = (*cnode)->parent->keys[children_index+1];
             (*cnode)->parent->keys[children_index+1] = INT_MAX;
             (*cnode)->parent->number_keys--;
-            printf("qqqqq\n");
-            //(*cnode)->children[0]->keys[1] = (*cnode)->children[1]->keys[0];
-            //(*cnode)->children[0]->number_keys = 2;
-            printf("pppp\n");
             (*cnode)->keys[1] = (*cnode)->parent->children[children_index+1]->keys[0];
 
             (*cnode)->children[1] = (*cnode)->parent->children[children_index+1]->children[0];
@@ -370,32 +360,14 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
         }
         //2つ左の兄弟が2つのキーを持っている場合
         else if(children_index==2 && (*cnode)->parent->children[children_index-2] != NULL && (*cnode)->parent->children[children_index-2]->number_keys == 2) {
-            printf("aaaaa\n");
             (*cnode)->parent->children[1]->keys[1] = (*cnode)->parent->keys[children_index-1];
-            printf("bbbbb\n");
-        
             (*cnode)->parent->children[1]->number_keys = 2;
-            printf("children[1]->number_keys: %d\n", (*cnode)->parent->children[1]->number_keys);
-            
-            //printf("ccccc\n");
-            
             (*cnode)->parent->number_keys--;
-            //printf("ddddd\n");
-            
             (*cnode)->parent->keys[children_index-1] = INT_MAX;
-            //printf("eeeee\n");
-            
             (*cnode)->parent->children[1]->children[2] = (*cnode)->children[0];
-            //printf("%d",(*cnode)->parent->children[1]->children[2]->number_keys);
-            //printf("fffff\n");
-            
             
             free((*cnode)->children[0]);
-            //printf("ggggg\n");
-            
             (*cnode)->parent->children[2] = NULL;
-            //printf("hhhhh\n");
-
             free((*cnode));
            
             printf("method 2-4.\n");
@@ -405,18 +377,11 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
         else{
             //親ノードが1つのキーを持っている場合
             if((*cnode)->parent->number_keys == 1) {
-                printf("Leaf node is 1 key, parent has 1 key.\n");
-                printf("children_index: %d\n", children_index);
                 if(children_index==0){
-                    printf("a\n");
                     (*cnode)->parent->children[0]->keys[0] = (*cnode)->parent->keys[0];
-                    printf("b\n");
                     (*cnode)->parent->children[0]->keys[1] = (*cnode)->parent->children[1]->keys[0];
-                    printf("c\n");
                     (*cnode)->parent->children[0]->number_keys = 2;
-                    printf("d\n");
                     (*cnode)->children[1] = (*cnode)->parent->children[1]->children[0];
-                    printf("e\n");
                     (*cnode)->children[2] = (*cnode)->parent->children[1]->children[1];
                 
                     //親が root なら縮退処理を行う
@@ -526,46 +491,29 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
         }
     }
     else{
-        printf("lllll\n");
+        printf("ERROR!! number_keys is not 1\n");
         printf("(*cnode)->number_keys: %d\n", (*cnode)->number_keys);
-        printf("Error: Leaf node is 1 key, but parent has more than 2 keys.\n");
+        Search(&tree.root, 0);
         return -1;
     }
-    if ((*cnode)->parent == NULL && (*cnode)->number_keys == 0) {
-        int hasChild = 0;
-        for (int i = 0; i < 4; i++) {
-            if ((*cnode)->children[i] != NULL) {
-                hasChild = 1;
-                break;
-            }
-        }
-
-        if (hasChild) {
-            for (int i = 0; i < 4; i++) {
-                if ((*cnode)->children[i]) {
-                    tree.root = (*cnode)->children[i];
-                    tree.root->parent = NULL;
-                    break;
-                }
-            }
-        }else {
-            tree.root = NULL;
-        }
-
-        free(*cnode);
-        *cnode = NULL;
-        return 0;
-    }
-    printf("children_index: %d\n", children_index);
-    printf("(*cnode)->number_keys: %d\n", (*cnode)->number_keys);
-    printf("method 100.\n");
-    Search(&tree.root, 0);
-    return 0;
 }
 
 int Actually_delete_leaf(Node **cnode, int i,int children_index){
-    printf("children_index: %d\n", children_index);
-    printf("i: %d\n", i);
+    printf("children?index: %d\n", children_index);
+    printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
+    //int idx = -1;
+    //for (int k = 0; k < 4; k++) {
+    //    if ((*cnode)->parent->children[k] == (*cnode)) {
+    //        idx = k;
+    //        break;
+    //    }
+    //}
+    //if (idx == -1) {
+    //    printf("children_index ERROR!!!!!!!!!!\n");
+    //    return -1;
+    //}
+    //children_index = idx;
+
     //if((*cnode)->parent->children[0]!=NULL){
     //    printf("(*cnode)->parent->children[0]->number_keys: %d\n", (*cnode)->parent->children[0]->number_keys);
     //    printf("(*cnode)->parent->children[0]->keys[0]: %d\n", (*cnode)->parent->children[0]->keys[0]);
@@ -609,7 +557,6 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
             (*cnode)->parent->children[children_index+1]->keys[0] = (*cnode)->parent->children[children_index+1]->keys[1];
             (*cnode)->parent->children[children_index+1]->keys[1] = INT_MAX;
             (*cnode)->parent->children[children_index+1]->number_keys--;
-            printf("Leaf node is 1 key, borrowed from right (*cnode)->parent->children[0].\n");
             printf("method 2.\n");
             return 0;
         }
@@ -619,7 +566,6 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
             (*cnode)->parent->keys[children_index-1] = (*cnode)->parent->children[children_index-1]->keys[1];
             (*cnode)->parent->children[children_index-1]->keys[1] = INT_MAX;
             (*cnode)->parent->children[children_index-1]->number_keys--;
-            printf("Leaf node is 1 key, borrowed from left (*cnode)->parent->children[0].\n");
             printf("method 2.\n");
             return 0;
         }
@@ -632,7 +578,6 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
             (*cnode)->parent->children[children_index+2]->keys[0] = (*cnode)->parent->children[children_index+2]->keys[1];
             (*cnode)->parent->children[children_index+2]->keys[1] = INT_MAX;
             (*cnode)->parent->children[children_index+2]->number_keys--;
-            printf("Leaf node is 1 key, borrowed from right (*cnode)->parent->children[0].\n");
             printf("method 2.\n");
             return 0;
         }
@@ -644,7 +589,6 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
             (*cnode)->parent->keys[children_index-2] = (*cnode)->parent->children[children_index-2]->keys[1];
             (*cnode)->parent->children[children_index-2]->keys[1] = INT_MAX;
             (*cnode)->parent->children[children_index-2]->number_keys--;
-            printf("Leaf node is 1 key, borrowed from left (*cnode)->parent->children[0].\n");
             printf("method 2.\n");
             return 0;
         }
@@ -652,7 +596,7 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
         else{
             if((*cnode)->parent->number_keys==2){
                 //兄弟のキーが1つ&&親のキーが2つの場合
-                printf("Leaf node is 1 key, parent has 2 keys.\n");
+
                 //兄弟のキーを親に移動
                 if(children_index==0){
                     (*cnode)->keys[0] = (*cnode)->parent->keys[0];
@@ -676,13 +620,11 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
                     (*cnode)->parent->children[1] = (*cnode)->parent->children[2];
                     (*cnode)->parent->children[2] = NULL;
                     (*cnode)->parent->number_keys--;
-                    printf("parent->number_keys%d\n", (*cnode)->parent->number_keys);
 
                 }
                 else if(children_index==2){
                     //printf("aaaaa\n");
                     (*cnode)->parent->children[1]->keys[1] = (*cnode)->parent->keys[1];
-                    printf("parent->children[1]->keys[1]:%d",(*cnode)->parent->children[1]->keys[1]);
                     (*cnode)->parent->children[1]->number_keys = 2;
                     (*cnode)->parent->keys[1] = INT_MAX;
                     (*cnode)->parent->number_keys--;
@@ -694,8 +636,8 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
             }
             //兄弟のキーが1つ && 親のキーが1つの場合
             else{
-                printf("Leaf node is 1 key, parent has 1 key.\n");
                 if(children_index==0){
+                    //printf("aaaaaaa\n");
                     (*cnode)->parent->children[0]->keys[0] = (*cnode)->parent->keys[0];
                     (*cnode)->parent->children[0]->keys[1] = (*cnode)->parent->children[1]->keys[0];
                     (*cnode)->parent->children[0]->number_keys = 2;
@@ -709,11 +651,7 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
                         printf("l-INT_MIN method 4.\n");
                     } else {
                         //親が root でなければ通常のマージ
-                        printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
                         (*cnode)->parent->keys[0] = INT_MIN;
-                        printf("(*cnode)->parent->children[0])->keys[0]: %d\n", (*cnode)->parent->children[0]->keys[0]);
-                        printf("(*cnode)->parent->children[0])->keys[1]: %d\n", (*cnode)->parent->children[0]->keys[1]);
-                        printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
                         free((*cnode)->parent->children[1]);
                         (*cnode)->parent->children[1] = NULL;
                         (*cnode)->number_keys = 2;
@@ -742,43 +680,37 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
                         //(*cnode)->parent->number_keys--;
                     
                         printf("l-INT_MIN method 1-2.\n");
-                        printf("children_index: %d\n", children_index);
                     }
                     return 0;
                 }
-                printf("lllllll\n");
-                (*cnode)->parent->children[0]->number_keys = 2;
-                (*cnode)->parent->keys[0] = INT_MIN;
-                Node *tmp;
-                tmp = (*cnode)->parent->children[1];
-                (*cnode)->parent->children[1] = NULL;
-                free(tmp);
-                    printf("l-INT_MIN method 2.\n");
+                printf("ERROR!! children_index is not 0 or 1\n");
+                printf("children_index: %d\n", children_index);
             }
             //親が root の場合は縮退
-            if((*cnode)->parent->parent == NULL) {
-                tree.root = (*cnode)->parent->children[0];
-                (*cnode)->parent->children[0]->parent = NULL;
-                free((*cnode)->parent);
-            } else {
-                (*cnode)->parent->keys[0] = INT_MIN;
-                //(*cnode)->parent->number_keys--;
-                //親の children を整理（安全性向上のため）
-                for(int k = children_index; k < 3; k++) {
-                    (*cnode)->parent->children[k] = (*cnode)->parent->children[k + 1];
-                }
-                (*cnode)->parent->children[3] = NULL;
-                printf("l-INT_MIN method 3.\n");
-            }
+            //if((*cnode)->parent->parent == NULL) {
+            //    tree.root = (*cnode)->parent->children[0];
+            //    (*cnode)->parent->children[0]->parent = NULL;
+            //    free((*cnode)->parent);
+            //} else {
+            //    (*cnode)->parent->keys[0] = INT_MIN;
+            //    //(*cnode)->parent->number_keys--;
+            //    //親の children を整理（安全性向上のため）
+            //    for(int k = children_index; k < 3; k++) {
+            //        (*cnode)->parent->children[k] = (*cnode)->parent->children[k + 1];
+            //    }
+            //    (*cnode)->parent->children[3] = NULL;
+            //    printf("l-INT_MIN method 3.\n");
+            //}
 
-            free(*cnode);
-            *cnode = NULL;
-            return 0;
+            //free(*cnode);
+            //*cnode = NULL;
+            //return 0;
         }
         return 0;
     }
     else{
-        printf("Leaf node have not key.\n");
+        printf("ERROR!!!! number_keys is not 1 or 2\n");
+        printf("(*cnode)->number_keys: %d\n", (*cnode)->number_keys);
         return 0;
     }
 }
@@ -789,6 +721,9 @@ int main(void){
     int i;
     int selection;
     tree.root = NULL; //木の根をNULLに初期化
+    for(int j = 1; j < 1001; j++) {
+        Insert(&tree.root, j, NULL, NULL, 0);
+    }
     //Insert(&tree.root,5, NULL, NULL,0);
     //Insert(&tree.root,3, NULL, NULL,0);
     //Insert(&tree.root,8, NULL, NULL,0);
@@ -803,17 +738,17 @@ int main(void){
     //Insert(&tree.root,2, NULL, NULL,0);
     //Insert(&tree.root,14, NULL, NULL,0);
     //Insert(&tree.root,15, NULL, NULL,0);
-    Insert(&tree.root,2, NULL, NULL,0);
-    Insert(&tree.root,5, NULL, NULL,0);
-    Insert(&tree.root,9, NULL, NULL,0);
+    //Insert(&tree.root,2, NULL, NULL,0);
+    //Insert(&tree.root,5, NULL, NULL,0);
+    //Insert(&tree.root,9, NULL, NULL,0);
     //Insert(&tree.root,11, NULL, NULL,0);
     //Insert(&tree.root,13, NULL, NULL,0);
-    Insert(&tree.root,1, NULL, NULL,0);
-    Insert(&tree.root,3, NULL, NULL,0);
+    //Insert(&tree.root,1, NULL, NULL,0);
+    //Insert(&tree.root,3, NULL, NULL,0);
     //Insert(&tree.root,12, NULL, NULL,0);
     //Insert(&tree.root,15, NULL, NULL,0);
-    Insert(&tree.root,6, NULL, NULL,0);
-    Insert(&tree.root,10, NULL, NULL,0);
+    //Insert(&tree.root,6, NULL, NULL,0);
+    //Insert(&tree.root,10, NULL, NULL,0);
 
 
 
@@ -836,7 +771,7 @@ int main(void){
             printf("Delete:\n");
             scanf("%d", &i);
             Delete_leaf((&tree.root), i,0);
-            //Search(&tree.root,0);
+            Search(&tree.root,0);
             Delete_internal((&tree.root), i,0);
             break;
         case 4 :
