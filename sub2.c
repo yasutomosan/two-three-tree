@@ -33,13 +33,13 @@ int Search(Node **cnode,int space){
     for(int i = 0; i < space; i++) {
         printf(" ");
     }
-    if((*cnode)->keys[0] == INT_MIN || (*cnode)->keys[0] == INT_MAX) {
-        printf("show ERROR\n");
-        if((*cnode)->keys[0] == INT_MIN){
-            printf("INT_MIN found in keys[0].\n");
-        }
-        //return -1;
-    }
+    //if((*cnode)->keys[0] == INT_MIN || (*cnode)->keys[0] == INT_MAX) {
+    //    printf("show ERROR\n");
+    //    if((*cnode)->keys[0] == INT_MIN){
+    //        printf("INT_MIN found in keys[0].\n");
+    //    }
+    //    //return -1;
+    //}
     if((*cnode)->keys[1] == INT_MIN || (*cnode)->keys[1] == INT_MAX){
         
         printf("[%*d",width, (*cnode)->keys[0]);
@@ -377,29 +377,97 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
             (*cnode)->parent->children[1]->number_keys = 2;
             printf("children[1]->number_keys: %d\n", (*cnode)->parent->children[1]->number_keys);
             
-            printf("ccccc\n");
+            //printf("ccccc\n");
             
             (*cnode)->parent->number_keys--;
-            printf("ddddd\n");
+            //printf("ddddd\n");
             
             (*cnode)->parent->keys[children_index-1] = INT_MAX;
-            printf("eeeee\n");
+            //printf("eeeee\n");
             
             (*cnode)->parent->children[1]->children[2] = (*cnode)->children[0];
-            printf("%d",(*cnode)->parent->children[1]->children[2]->number_keys);
-            printf("fffff\n");
+            //printf("%d",(*cnode)->parent->children[1]->children[2]->number_keys);
+            //printf("fffff\n");
             
             
             free((*cnode)->children[0]);
-            printf("ggggg\n");
+            //printf("ggggg\n");
             
             (*cnode)->parent->children[2] = NULL;
-            printf("hhhhh\n");
+            //printf("hhhhh\n");
 
             free((*cnode));
            
             printf("method 2-4.\n");
             return 0;
+        }
+        else{
+            printf("Leaf node is 1 key, parent has 1 key.\n");
+            printf("children_index: %d\n", children_index);
+            if(children_index==0){
+                (*cnode)->parent->children[0]->keys[0] = (*cnode)->parent->keys[0];
+                (*cnode)->parent->children[0]->keys[1] = (*cnode)->parent->children[1]->keys[0];
+                (*cnode)->parent->children[0]->number_keys = 2;
+                (*cnode)->children[1] = (*cnode)->parent->children[1]->children[0];
+                (*cnode)->children[2] = (*cnode)->parent->children[1]->children[1];
+            
+
+
+                //親が root なら縮退処理を行う
+                if ((*cnode)->parent->parent == NULL) {
+                    tree.root = (*cnode)->parent->children[0];
+                    (*cnode)->parent->children[0]->parent = NULL;
+                    free((*cnode)->parent);
+                    free((*cnode)->parent->children[1]);
+                    printf("INT_MIN method 4-1.\n");
+                } else {
+                    //親が root でなければ通常のマージ
+                    printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
+                    (*cnode)->parent->keys[0] = INT_MIN;
+                    printf("(*cnode)->parent->children[0])->keys[0]: %d\n", (*cnode)->parent->children[0]->keys[0]);
+                    printf("(*cnode)->parent->children[0])->keys[1]: %d\n", (*cnode)->parent->children[0]->keys[1]);
+                    printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
+                    free((*cnode)->parent->children[1]);
+                    (*cnode)->parent->children[1] = NULL;
+                    (*cnode)->number_keys = 2;
+                    //(*cnode)->parent->number_keys--;
+                
+                    printf("INT_MIN method 1.\n");
+                }
+                return 0;
+            }
+            if(children_index==1){
+                (*cnode)->parent->children[0]->keys[1] = (*cnode)->parent->keys[0];
+                (*cnode)->parent->children[0]->number_keys = 2;
+                (*cnode)->parent->children[0]->children[2] = (*cnode)->parent->children[1]->children[0];
+                
+                //親が root なら縮退処理を行う
+                if ((*cnode)->parent->parent == NULL) {
+                    tree.root = (*cnode)->parent->children[0];
+                    (*cnode)->parent->children[0]->parent = NULL;
+                    free((*cnode)->parent);
+                    Search(&tree.root, 0);
+                    printf("INT_MIN method 4-2.\n");
+                } else {
+                    //親が root でなければ通常のマージ
+                    //printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
+                    (*cnode)->parent->keys[0] = INT_MIN;
+                    
+                    (*cnode)->parent->children[1]=NULL;
+                    free((*cnode));
+                    //(*cnode)->parent->number_keys--;
+                
+                    printf("INT_MIN method 1-2.\n");
+                }
+                return 0;
+            }
+            (*cnode)->parent->children[0]->number_keys = 2;
+            (*cnode)->parent->keys[0] = INT_MIN;
+            Node *tmp;
+            tmp = (*cnode)->parent->children[1];
+            (*cnode)->parent->children[1] = NULL;
+            free(tmp);
+            printf("INT_MIN method 2.\n");
         }
     }
     else{
@@ -424,7 +492,7 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
                     break;
                 }
             }
-        } else {
+        }else {
             tree.root = NULL;
         }
 
@@ -432,6 +500,10 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
         *cnode = NULL;
         return 0;
     }
+    printf("children_index: %d\n", children_index);
+    printf("(*cnode)->number_keys: %d\n", (*cnode)->number_keys);
+    printf("method 100.\n");
+    Search(&tree.root, 0);
     return 0;
 }
 
@@ -575,8 +647,10 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
                     //親が root なら縮退処理を行う
                     if ((*cnode)->parent->parent == NULL) {
                         tree.root = (*cnode)->parent->children[0];
+
                         (*cnode)->parent->children[0]->parent = NULL;
                         free((*cnode)->parent);
+                        printf("l-INT_MIN method 4.\n");
                     } else {
                         //親が root でなければ通常のマージ
                         printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
@@ -589,25 +663,41 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
                         (*cnode)->number_keys = 2;
                         //(*cnode)->parent->number_keys--;
                     
-                        printf("INT_MIN method 1.\n");
+                        printf("l-INT_MIN method 1.\n");
                     }
-                
-                    //free(*cnode);
-                    //*cnode = NULL;
                     return 0;
                 }
                 if(children_index==1){
-
                     (*cnode)->parent->children[0]->keys[1] = (*cnode)->parent->keys[0];
-
+                    (*cnode)->parent->children[0]->number_keys = 2;
+                
+                    //親が root なら縮退処理を行う
+                    if ((*cnode)->parent->parent == NULL) {
+                        tree.root = (*cnode)->parent->children[0];
+                        (*cnode)->parent->children[0]->parent = NULL;
+                        free((*cnode)->parent);
+                    } else {
+                        //親が root でなければ通常のマージ
+                        //printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
+                        (*cnode)->parent->keys[0] = INT_MIN;
+                        
+                        (*cnode)->parent->children[1]=NULL;
+                        free((*cnode));
+                        //(*cnode)->parent->number_keys--;
+                    
+                        printf("l-INT_MIN method 1-2.\n");
+                        printf("children_index: %d\n", children_index);
+                    }
+                    return 0;
                 }
+                printf("lllllll\n");
                 (*cnode)->parent->children[0]->number_keys = 2;
                 (*cnode)->parent->keys[0] = INT_MIN;
                 Node *tmp;
                 tmp = (*cnode)->parent->children[1];
                 (*cnode)->parent->children[1] = NULL;
                 free(tmp);
-                    printf("INT_MIN method 2.\n");
+                    printf("l-INT_MIN method 2.\n");
             }
             //親が root の場合は縮退
             if((*cnode)->parent->parent == NULL) {
@@ -622,7 +712,7 @@ int Actually_delete_leaf(Node **cnode, int i,int children_index){
                     (*cnode)->parent->children[k] = (*cnode)->parent->children[k + 1];
                 }
                 (*cnode)->parent->children[3] = NULL;
-                printf("INT_MIN method 3.\n");
+                printf("l-INT_MIN method 3.\n");
             }
 
             free(*cnode);
@@ -643,21 +733,32 @@ int main(void){
     int i;
     int selection;
     tree.root = NULL; //木の根をNULLに初期化
-    Insert(&tree.root,5, NULL, NULL,0);
-    Insert(&tree.root,3, NULL, NULL,0);
-    Insert(&tree.root,8, NULL, NULL,0);
-    Insert(&tree.root,9, NULL, NULL,0);
-    Insert(&tree.root,10, NULL, NULL,0);
-    Insert(&tree.root,11, NULL, NULL,0);
-    Insert(&tree.root,12, NULL, NULL,0);
-    Insert(&tree.root,13, NULL, NULL,0);
-    Insert(&tree.root,6, NULL, NULL,0);
-    Insert(&tree.root,7, NULL, NULL,0);
-    Insert(&tree.root,1, NULL, NULL,0);
+    //Insert(&tree.root,5, NULL, NULL,0);
+    //Insert(&tree.root,3, NULL, NULL,0);
+    //Insert(&tree.root,8, NULL, NULL,0);
+    //Insert(&tree.root,9, NULL, NULL,0);
+    //Insert(&tree.root,10, NULL, NULL,0);
+    //Insert(&tree.root,11, NULL, NULL,0);
+    //Insert(&tree.root,12, NULL, NULL,0);
+    //Insert(&tree.root,13, NULL, NULL,0);
+    //Insert(&tree.root,6, NULL, NULL,0);
+    //Insert(&tree.root,7, NULL, NULL,0);
+    //Insert(&tree.root,1, NULL, NULL,0);
+    //Insert(&tree.root,2, NULL, NULL,0);
+    //Insert(&tree.root,14, NULL, NULL,0);
+    //Insert(&tree.root,15, NULL, NULL,0);
     Insert(&tree.root,2, NULL, NULL,0);
-    Insert(&tree.root,14, NULL, NULL,0);
+    Insert(&tree.root,5, NULL, NULL,0);
+    Insert(&tree.root,9, NULL, NULL,0);
+    Insert(&tree.root,11, NULL, NULL,0);
+    Insert(&tree.root,13, NULL, NULL,0);
+    Insert(&tree.root,1, NULL, NULL,0);
+    Insert(&tree.root,3, NULL, NULL,0);
+    Insert(&tree.root,12, NULL, NULL,0);
     Insert(&tree.root,15, NULL, NULL,0);
-   
+    Insert(&tree.root,6, NULL, NULL,0);
+    Insert(&tree.root,10, NULL, NULL,0);
+
 
 
 
