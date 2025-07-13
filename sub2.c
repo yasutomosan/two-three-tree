@@ -408,18 +408,23 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
                 printf("Leaf node is 1 key, parent has 1 key.\n");
                 printf("children_index: %d\n", children_index);
                 if(children_index==0){
+                    printf("a\n");
                     (*cnode)->parent->children[0]->keys[0] = (*cnode)->parent->keys[0];
+                    printf("b\n");
                     (*cnode)->parent->children[0]->keys[1] = (*cnode)->parent->children[1]->keys[0];
+                    printf("c\n");
                     (*cnode)->parent->children[0]->number_keys = 2;
+                    printf("d\n");
                     (*cnode)->children[1] = (*cnode)->parent->children[1]->children[0];
+                    printf("e\n");
                     (*cnode)->children[2] = (*cnode)->parent->children[1]->children[1];
                 
                     //親が root なら縮退処理を行う
                     if ((*cnode)->parent->parent == NULL) {
                         tree.root = (*cnode)->parent->children[0];
-                        (*cnode)->parent->children[0]->parent = NULL;
                         free((*cnode)->parent->children[1]);
                         free((*cnode)->parent);
+                        (*cnode)->parent = NULL;
                         printf("INT_MIN method 4-1.\n");
                     } else {
                         //親が root でなければ通常のマージ
@@ -467,7 +472,7 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
             else if((*cnode)->parent->number_keys == 2) {
                 if(children_index==0){
                     (*cnode)->parent->children[0]->keys[0] = (*cnode)->parent->keys[0];
-                    (*cnode)->parent->children[0]->keys[1] = (*cnode)->parent->children[1]->keys[1];
+                    (*cnode)->parent->children[0]->keys[1] = (*cnode)->parent->children[1]->keys[0];
                     (*cnode)->parent->children[0]->number_keys = 2;
                     (*cnode)->parent->children[0]->children[1] = (*cnode)->parent->children[1]->children[0];
                     (*cnode)->parent->children[0]->children[2] = (*cnode)->parent->children[1]->children[1];
@@ -484,7 +489,7 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
                 }
                 if(children_index==1){
                     (*cnode)->parent->children[1]->keys[0] = (*cnode)->parent->keys[1];
-                    (*cnode)->parent->children[1]->keys[1] = (*cnode)->parent->children[2]->keys[1];
+                    (*cnode)->parent->children[1]->keys[1] = (*cnode)->parent->children[2]->keys[0];
                     (*cnode)->parent->children[1]->number_keys = 2;
                     (*cnode)->parent->children[1]->children[1] = (*cnode)->parent->children[2]->children[0];
                     (*cnode)->parent->children[1]->children[2] = (*cnode)->parent->children[2]->children[1];
@@ -801,12 +806,12 @@ int main(void){
     Insert(&tree.root,2, NULL, NULL,0);
     Insert(&tree.root,5, NULL, NULL,0);
     Insert(&tree.root,9, NULL, NULL,0);
-    Insert(&tree.root,11, NULL, NULL,0);
-    Insert(&tree.root,13, NULL, NULL,0);
+    //Insert(&tree.root,11, NULL, NULL,0);
+    //Insert(&tree.root,13, NULL, NULL,0);
     Insert(&tree.root,1, NULL, NULL,0);
     Insert(&tree.root,3, NULL, NULL,0);
-    Insert(&tree.root,12, NULL, NULL,0);
-    Insert(&tree.root,15, NULL, NULL,0);
+    //Insert(&tree.root,12, NULL, NULL,0);
+    //Insert(&tree.root,15, NULL, NULL,0);
     Insert(&tree.root,6, NULL, NULL,0);
     Insert(&tree.root,10, NULL, NULL,0);
 
@@ -831,7 +836,7 @@ int main(void){
             printf("Delete:\n");
             scanf("%d", &i);
             Delete_leaf((&tree.root), i,0);
-            Search(&tree.root,0);
+            //Search(&tree.root,0);
             Delete_internal((&tree.root), i,0);
             break;
         case 4 :
