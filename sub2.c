@@ -401,6 +401,7 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
             printf("method 2-4.\n");
             return 0;
         }
+        //兄弟が全員1キー
         else{
             printf("Leaf node is 1 key, parent has 1 key.\n");
             printf("children_index: %d\n", children_index);
@@ -411,8 +412,6 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
                 (*cnode)->children[1] = (*cnode)->parent->children[1]->children[0];
                 (*cnode)->children[2] = (*cnode)->parent->children[1]->children[1];
             
-
-
                 //親が root なら縮退処理を行う
                 if ((*cnode)->parent->parent == NULL) {
                     tree.root = (*cnode)->parent->children[0];
@@ -461,13 +460,32 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
                 }
                 return 0;
             }
-            (*cnode)->parent->children[0]->number_keys = 2;
-            (*cnode)->parent->keys[0] = INT_MIN;
-            Node *tmp;
-            tmp = (*cnode)->parent->children[1];
-            (*cnode)->parent->children[1] = NULL;
-            free(tmp);
-            printf("INT_MIN method 2.\n");
+            //親ノードが2キーのときのみ
+            if(children_index==2){
+                (*cnode)->parent->children[1]->keys[1] = (*cnode)->parent->keys[1];
+                (*cnode)->parent->children[1]->number_keys = 2;
+                (*cnode)->parent->children[1]->children[2] = (*cnode)->children[0];
+                (*cnode)->parent->number_keys--;
+                (*cnode)->parent->keys[1] = INT_MAX;
+
+                
+                //親が root でなければ通常のマージ
+                //printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
+                
+                (*cnode)->parent->children[2]=NULL;
+                free((*cnode));
+                //(*cnode)->parent->number_keys--;
+            
+                printf("INT_MIN method 1-2.\n");
+                return 0;
+            }
+            //(*cnode)->parent->children[0]->number_keys = 2;
+            //(*cnode)->parent->keys[0] = INT_MIN;
+            //Node *tmp;
+            //tmp = (*cnode)->parent->children[1];
+            //(*cnode)->parent->children[1] = NULL;
+            //free(tmp);
+            //printf("INT_MIN method 2.\n");
         }
     }
     else{
