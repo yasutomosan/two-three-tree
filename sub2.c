@@ -23,9 +23,28 @@ int Delete_leaf(Node **cnode, int i,int children_index);
 int Actually_delete_internal(Node **cnode,int j,int children_index);
 int InsertUP(Node **cnode, int i, Node *left, Node *right);
 
+int Search(Node **cnode, int i) {
+    if(*cnode == NULL) {
+        return 0; //木が空なら0を返す
+    }
+    int q;
+    //葉ではなかったら葉へ移動
+    for(int j = 0; j < (*cnode)->number_keys; j++) {
+        if((*cnode)->keys[j] == i) {
+            printf("Key %d found!!\n", i);
+            return 1; //キーが見つかった場合
+        }
+    }
+    for(int j = 0; j < (*cnode)->number_keys+1; j++) {
+        q=Search(&(*cnode)->children[j], i);
+        if(q == 1) return 1; //キーが見つかった場合
+    }
 
+    //キーが見つからなかった場合
+    return 0;
+}
 
-int Search(Node **cnode,int space){
+int Show(Node **cnode,int space){
     if(tree.root == NULL) {
         printf("Tree is empty.\n");
         return 0;
@@ -39,8 +58,8 @@ int Search(Node **cnode,int space){
         for(int i=0;i<width+1;i++){
             printf(" ");
         }
-        //printf("]\n");
-        printf("] number_keys:%d\n", (*cnode)->number_keys);
+        printf("]\n");
+        //printf("] number_keys:%d\n", (*cnode)->number_keys);
 
     }
     else{
@@ -50,7 +69,7 @@ int Search(Node **cnode,int space){
     //子を表示
     for (int i = 0; i < 4; i++) {
         if ((*cnode)->children[i] != NULL) {
-            Search(&(*cnode)->children[i],space + 3 + 2*width);
+            Show(&(*cnode)->children[i],space + 3 + 2*width);
         } else {
             //printf("empty\n");
         }
@@ -467,7 +486,7 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
     else{
         printf("ERROR!! number_keys is not 1\n");
         printf("(*cnode)->number_keys: %d\n", (*cnode)->number_keys);
-        Search(&tree.root, 0);
+        Show(&tree.root, 0);
         return -1;
     }
 }
@@ -659,7 +678,7 @@ int Actually_delete_leaf(Node **cnode, int i){
 
 
 int main(void){
-    int i;
+    int i,q;
     int selection;
     tree.root = NULL; //木の根をNULLに初期化
     //for(int j = 1; j < 1001; j++) {
@@ -696,7 +715,7 @@ int main(void){
 
 
     while (1){
-        printf("\nEnter a command (1: Insert, 2: Search, 3: Delete, 4: Exit): "); 
+        printf("\nEnter a command (1:Insert, 2:Delete, 3:Search, 4:Show, 5:Exit): "); 
         scanf("%d", &selection);
         switch(selection){
         case 1 :
@@ -705,17 +724,25 @@ int main(void){
             Insert(&tree.root,i, NULL, NULL,0);
             break;
         case 2 :
-            printf("Search\n");
-            Search(&tree.root,0);
-            break;
-        case 3 :
             printf("Delete:\n");
             scanf("%d", &i);
             Delete_leaf((&tree.root), i,0);
-            Search(&tree.root,0);
+            //Show(&tree.root,0);
             Delete_internal((&tree.root), i,0);
             break;
+        case 3 :
+            printf("Search:\n");
+            scanf("%d", &i);
+            q=Search(&tree.root,i);
+            if(q==0){
+                printf("Key %d not found.\n",i);
+            }
+            break;
         case 4 :
+            printf("Show\n");
+            Show(&tree.root,0);
+            break;
+        case 5 :
             printf("Exit\n");
             return 0;
             break;
