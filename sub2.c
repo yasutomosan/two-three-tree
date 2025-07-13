@@ -474,18 +474,20 @@ int Actually_delete_internal(Node **cnode, int i,int children_index){
 int Actually_delete_leaf(Node **cnode, int i){
     printf("(*cnode)->keys[0]: %d\n", (*cnode)->keys[0]);
     int idx = -1;
-    for (int k = 0; k < 4; k++) {
-        if ((*cnode)->parent->children[k] == (*cnode)) {
-            idx = k;
-            break;
+    //自分の子番号を確かめる
+    if((*cnode)->parent!=NULL){
+        for (int k = 0; k < 4; k++) {
+            if ((*cnode)->parent->children[k] == (*cnode)) {
+                idx = k;
+                break;
+            }
+        }
+        if (idx == -1) {
+            printf("children_index ERROR!!!!!!!!!!\n");
+            return -1;
         }
     }
-    if (idx == -1) {
-        printf("children_index ERROR!!!!!!!!!!\n");
-        return -1;
-    }
     int children_index = idx;
-
     if((*cnode)->parent == NULL && (*cnode)->number_keys == 1 && (*cnode)->children[0] == NULL) {
         free(*cnode);
         *cnode = NULL;
@@ -494,6 +496,8 @@ int Actually_delete_leaf(Node **cnode, int i){
     }
     //キーが2つの場合
     if((*cnode)->number_keys == 2) {
+        printf("made\n");
+
         if(i == 0) {
             (*cnode)->keys[0] = (*cnode)->keys[1];
             (*cnode)->keys[1] = INT_MAX;
