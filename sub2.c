@@ -39,7 +39,8 @@ int Search(Node **cnode,int space){
         for(int i=0;i<width+1;i++){
             printf(" ");
         }
-        printf("]\n");
+        //printf("]\n");
+        printf("] number_keys:%d\n", (*cnode)->number_keys);
 
     }
     else{
@@ -636,7 +637,7 @@ int Actually_delete_leaf(Node **cnode, int i){
                         
                         (*cnode)->parent->children[1]=NULL;
                         free((*cnode));
-                        (*cnode)->parent->number_keys--;
+                        //(*cnode)->parent->number_keys--;
                     
                         printf("l-INT_MIN method 1-2.\n");
                     }
